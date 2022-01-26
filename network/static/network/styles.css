@@ -1,0 +1,15 @@
+#createpost-button{
+    background-color: teal;
+    color: white;
+    border:black;
+    position: relative;
+    /* float: left; */
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 0%;
+    /* border-bottom:1px solid black; */
+}
+
+#createpost-button h1{
+    font-size: 2rem;
+}

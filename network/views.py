@@ -3,12 +3,28 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
-from .models import User
+from .models import *
+from . import forms
 
+MAX_POSTS_PER_PAGE = 10
 
 def index(request):
-    return render(request, "network/index.html")
+    if request.user.is_authenticated:
+        all_posts = Post.objects.all().order_by('-created_dt')
+        page_obj = paginate(request, all_posts)
+    return render(request, "network/index.html", {
+        'form': forms.CreatePostForm(),
+        'all_posts': page_obj
+    })
+
+def paginate(request, dataList):
+    paginator = Paginator(dataList, MAX_POSTS_PER_PAGE)
+    page_num = request.GET.get('page')
+    page_obj = paginator.get_page(page_num)
+    return page_obj
 
 
 def login_view(request):
@@ -61,3 +77,30 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+@login_required
+def create_post(request):
+    if request.method == "POST":
+        form = forms.CreatePostForm(request.POST)
+        if form.is_valid():
+            contents = form.cleaned_data["contents"]
+            if len(contents) > 0:
+                user = User.objects.get(id=request.session['_auth_user_id'])
+                post = Post(user=user, contents=contents)
+                post.save()
+                return HttpResponseRedirect(reverse("index"))
+            else:
+                return render(request, "network/createpost.html", {
+                    "form": form,
+                })
+        else:
+            return render(request, "network/createpost.html", {
+                "form": form,
+            })
+    else:
+        form = forms.CreatePostForm()
+        return render(request, "network/createpost.html", {
+            "form": form,
+        })
+
+
