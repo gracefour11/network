@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -12,9 +12,9 @@ from . import forms
 MAX_POSTS_PER_PAGE = 10
 
 def index(request):
-    if request.user.is_authenticated:
-        all_posts = Post.objects.all().order_by('-created_dt')
-        page_obj = paginate(request, all_posts)
+
+    all_posts = Post.objects.all().order_by('-created_dt')
+    page_obj = paginate(request, all_posts)
     return render(request, "network/index.html", {
         'form': forms.CreatePostForm(),
         'all_posts': page_obj
@@ -103,4 +103,45 @@ def create_post(request):
             "form": form,
         })
 
+@login_required
+def profile(request, username):
+    request_user = request.user
+    profile_user = User.objects.get(username=username)
+    follow_list = request_user.follow_list.all()
+    following_count = profile_user.get_following_count()
+    follower_count = profile_user.get_follower_count()
+    all_posts = Post.objects.all().order_by('-created_dt')
+    page_obj = paginate(request, all_posts)
+    is_following = False
+    
+    if profile_user in follow_list:
+        is_following = True
+    
+    return render(request, "network/profile.html", {
+        'profile_user': profile_user,
+        'following_count': following_count,
+        'follower_count': follower_count,
+        'all_posts': all_posts,
+        'page_obj': page_obj,
+        'is_following': is_following
+    })
 
+@login_required
+def follow(request, id):
+    user = request.user
+    target = User.objects.get(id=id)
+    user.follow_list.add(target)
+    user.save()
+    return redirect(reverse('profile', kwargs={
+        'username': target.username
+    }))
+
+@login_required
+def unfollow(request, id):
+    user = request.user
+    target = User.objects.get(id=id)
+    user.follow_list.remove(target)
+    user.save()
+    return redirect(reverse('profile', kwargs={
+        'username': target.username
+    }))
