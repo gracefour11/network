@@ -3,7 +3,14 @@ from django.db import models
 import datetime
 
 class User(AbstractUser):
-    pass
+    follow_list = models.ManyToManyField("self", related_name='follows', blank=True, symmetrical=False)
+
+    def get_follower_count(self):
+        return User.objects.filter(follow_list=self).count()
+    
+    def get_following_count(self):
+        return self.follow_list.count()
+    
 
 class Post(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="userID")
