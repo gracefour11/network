@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block title %}
 All Posts
@@ -17,9 +18,26 @@ All Posts
     <div class="card">
         <div class="card-body">
             <h4 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h4>
-            <p class="card-text" id="post_text_{{post.id}}"> {{ post.contents }}</p>
-            <p class="card-text ml-auto p-2">{{post.created_dt}}</p>
-            <!-- <p class="card-text"></p> -->
+            <p class="card-text" id="post_body_{{post.id}}"> {{ post.contents }}</p>
+            <p class="card-text ml-auto p-2"><small>{{post.created_dt}}</small></p>
+
+            <!-- EDIT FUNCTION (if current user is post user) -->
+            {% ifequal request.user post.user %}
+            <button class="btn btn-secondary" onclick='edit_post(`{{post.id}}`)'>Edit</button>
+            {% endifequal %}
+
+            <div id="edit_post_body_{{post.id}}" style="display:none">
+              <br>
+              <h5>Edit Post</h5>
+              <form id="edit_form_{{post.id}}">
+                <div class="form-group">
+                  <div class="input-group">
+                      <textarea class="form-control" rows="3" id="edit_text_{{post.id}}">{{post.contents}}</textarea>
+                  </div>
+              </div>
+              <button type="submit" class="btn btn-success">Save Changes</button>
+              </form>
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -46,4 +64,6 @@ All Posts
     </ul>
 
 </div>
+<script type ="text/javascript" src="{% static 'network/index.js' %}"></script>
 {% endblock %}
+

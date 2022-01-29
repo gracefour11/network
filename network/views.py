@@ -4,7 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
+from django.http.response import JsonResponse
+import json
 
 from .models import *
 from . import forms
@@ -103,6 +106,21 @@ def create_post(request):
             "form": form,
         })
 
+
+@csrf_exempt
+@login_required
+def edit_post(request, id):
+    if request.method == 'POST':
+        post = Post.objects.get(id=id)
+        data = json.loads(request.body)
+        if data.get("body") is not None:
+            post.contents = data["body"]
+        post.save()
+        return JsonResponse({"success": 'Post updated successfully.'}, status=204)
+    return JsonResponse({"error": "POST request required."}, status=400)
+            
+
+
 @login_required
 def profile(request, username):
     request_user = request.user
@@ -155,3 +173,4 @@ def following(request):
     return render(request, "network/following.html", {
         'all_posts': all_posts
     })
+
