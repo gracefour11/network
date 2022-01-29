@@ -13,11 +13,11 @@ MAX_POSTS_PER_PAGE = 10
 
 def index(request):
 
-    all_posts = Post.objects.all().order_by('-created_dt')
-    page_obj = paginate(request, all_posts)
+    unpaginated_posts = Post.objects.all().order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
     return render(request, "network/index.html", {
         'form': forms.CreatePostForm(),
-        'all_posts': page_obj
+        'all_posts': all_posts
     })
 
 def paginate(request, dataList):
@@ -110,8 +110,8 @@ def profile(request, username):
     follow_list = request_user.follow_list.all()
     following_count = profile_user.get_following_count()
     follower_count = profile_user.get_follower_count()
-    all_posts = Post.objects.all().order_by('-created_dt')
-    page_obj = paginate(request, all_posts)
+    unpaginated_posts = Post.objects.all().order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
     is_following = False
     
     if profile_user in follow_list:
@@ -122,7 +122,6 @@ def profile(request, username):
         'following_count': following_count,
         'follower_count': follower_count,
         'all_posts': all_posts,
-        'page_obj': page_obj,
         'is_following': is_following
     })
 
@@ -145,3 +144,14 @@ def unfollow(request, id):
     return redirect(reverse('profile', kwargs={
         'username': target.username
     }))
+
+@login_required
+def following(request):
+    user = request.user
+    follow_list = user.follow_list.all()
+    unpaginated_posts = Post.objects.filter(user__in=follow_list).order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
+
+    return render(request, "network/following.html", {
+        'all_posts': all_posts
+    })
