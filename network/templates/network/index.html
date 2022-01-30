@@ -1,12 +1,13 @@
 {% extends "network/layout.html" %}
 {% load static %}
 
+
 {% block title %}
-All Posts
+  All Posts
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid">
+<div class="container-fluid" id="index-view">
     <h1>All Posts</h1>
     <!-- CREATE POST -->
     {% include "network/createpost.html" %}
@@ -15,7 +16,7 @@ All Posts
 
     <!-- SHOW ALL POSTS BY CURRENT USER -->
     {% for post in all_posts %}
-    <div class="card">
+    <div class="card" id="post-view">
         <div class="card-body">
             <h2 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h2>
             <h3 class="card-text" id="post_body_{{post.id}}"> {{ post.contents }}</h3>
@@ -23,9 +24,9 @@ All Posts
             <p class="card-text ml-auto p-2"><small>{{post.created_dt}}</small></p>
             
             {% if request.user in post.likes.all %}
-              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-lg" style="color: grey; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: grey; " onclick="like_or_unlike(`{{post.id}}`)"></i>
             {% else %}
-              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-lg" style="color: salmon; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: salmon; " onclick="like_or_unlike(`{{post.id}}`)"></i>
             {% endif %} 
 
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -71,9 +72,9 @@ All Posts
           <li class="page-item disabled"><span class="page-link">Next</span></li>
         {% endif %}
     </ul>
-
 </div>
 <script type ="text/javascript" src="{% static 'network/index.js' %}"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 {% endblock %}
 

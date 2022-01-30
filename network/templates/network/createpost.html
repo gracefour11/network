@@ -1,6 +1,6 @@
 {% if user.is_authenticated %}
 <div class="card">
-    <div class="card-body">
+    <div class="card-body" id="createpost-form">
         <h2> Create new post</h2>
         <form action="{% url 'createpost'  %}" method="POST"  >
             {% csrf_token %}          
