@@ -119,6 +119,21 @@ def edit_post(request, id):
         return JsonResponse({"success": 'Post updated successfully.'}, status=204)
     return JsonResponse({"error": "POST request required."}, status=400)
             
+@csrf_exempt
+@login_required
+def like(request, id):
+    if request.method == 'POST':
+        post = Post.objects.get(id=id)
+        users_who_like_post = post.likes.all()
+        request_user = request.user
+        data = json.loads(request.body)
+        if data.get("like") == 'true':
+            post.likes.add(request_user)
+        else:
+            post.likes.remove(request_user)
+        post.save()
+        return JsonResponse({"likes": post.get_likes_count()})
+    return JsonResponse({"error": "POST request required."}, status=400)
 
 
 @login_required
@@ -173,4 +188,6 @@ def following(request):
     return render(request, "network/following.html", {
         'all_posts': all_posts
     })
+
+
 

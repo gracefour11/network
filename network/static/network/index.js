@@ -21,3 +21,27 @@ function edit_post(id) {
     }
 }
 
+function like_or_unlike(id) {
+    like_btn = document.getElementById(`like_btn_${id}`)
+    const currState = (like_btn.style.color == "salmon") ? "Unliked" : "Liked"
+    console.log("currState: " + currState)
+    const nextColor = (currState == "Unliked") ? "grey" : "salmon"
+    console.log("nextColor: " + nextColor)
+    const nextLikeState = (currState == "Liked") ? 'false' : 'true'
+    console.log("nextLikeState: " + nextLikeState)
+    like_count = document.querySelector(`#like_count_${id}`)
+
+    fetch(`like/${id}`, {
+        method: 'POST',
+        body: JSON.stringify({
+            like: nextLikeState
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        like_btn.style.color = nextColor
+        console.log(data)
+        like_count.innerHTML = `Likes: ${data['likes']}`.toString()
+        console.log(like_btn.innerHTML)
+    })
+}
