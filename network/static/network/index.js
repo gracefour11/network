@@ -23,9 +23,9 @@ function edit_post(id) {
 
 function like_or_unlike(id) {
     like_btn = document.getElementById(`like_btn_${id}`)
-    const currState = (like_btn.style.color == "salmon") ? "Unliked" : "Liked"
+    const currState = (like_btn.style.color == "salmon") ? "Liked" : "Unliked"
     console.log("currState: " + currState)
-    const nextColor = (currState == "Unliked") ? "grey" : "salmon"
+    const nextColor = (currState == "Unliked") ? "salmon" : "white"
     console.log("nextColor: " + nextColor)
     const nextLikeState = (currState == "Liked") ? 'false' : 'true'
     console.log("nextLikeState: " + nextLikeState)
@@ -41,7 +41,7 @@ function like_or_unlike(id) {
     .then(data => {
         like_btn.style.color = nextColor
         console.log(data)
-        like_count.innerHTML = `Likes: ${data['likes']}`.toString()
+        like_count.innerHTML = `${data['likes']}`.toString()
         console.log(like_btn.innerHTML)
     })
 }

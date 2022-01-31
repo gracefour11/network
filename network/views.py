@@ -15,12 +15,13 @@ from . import forms
 MAX_POSTS_PER_PAGE = 10
 
 def index(request):
-
     unpaginated_posts = Post.objects.all().order_by('-created_dt')
     all_posts = paginate(request, unpaginated_posts)
     return render(request, "network/index.html", {
         'form': forms.CreatePostForm(),
-        'all_posts': all_posts
+        'all_posts': all_posts,
+        "title": "All Posts",
+        'remove_create_post': "False"
     })
 
 def paginate(request, dataList):
@@ -143,19 +144,26 @@ def profile(request, username):
     follow_list = request_user.follow_list.all()
     following_count = profile_user.get_following_count()
     follower_count = profile_user.get_follower_count()
-    unpaginated_posts = Post.objects.all().order_by('-created_dt')
+    unpaginated_posts = Post.objects.filter(user=profile_user).order_by('-created_dt')
     all_posts = paginate(request, unpaginated_posts)
     is_following = False
     
     if profile_user in follow_list:
         is_following = True
+
+    remove_create_post = "True"
+    if request_user == profile_user:
+        remove_create_post = "False"
     
-    return render(request, "network/profile.html", {
+    return render(request, "network/index.html", {
         'profile_user': profile_user,
         'following_count': following_count,
         'follower_count': follower_count,
         'all_posts': all_posts,
-        'is_following': is_following
+        'is_following': is_following,
+        'is_profile_page': "True",
+        'title': profile_user.username,
+        'remove_create_post': remove_create_post
     })
 
 @login_required
@@ -185,8 +193,10 @@ def following(request):
     unpaginated_posts = Post.objects.filter(user__in=follow_list).order_by('-created_dt')
     all_posts = paginate(request, unpaginated_posts)
 
-    return render(request, "network/following.html", {
-        'all_posts': all_posts
+    return render(request, "network/index.html", {
+        'all_posts': all_posts,
+        'title': "Following",
+        'remove_create_post': "True"
     })
 
 

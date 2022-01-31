@@ -1,10 +1,9 @@
-#index-view, #following-view, #profile-view {
-    background-color:darkslategray;
-    color:aliceblue;
+#index-view, #following-view, #profile-view, #login-view, #register-view {
+    color:whitesmoke;
     padding:3rem;
 }
 .card {
-    background-color: aliceblue;
+    background-color: white;
     color: darkslategray;
 }
 
@@ -14,8 +13,18 @@
 
 #post-view {
     padding: 2rem;
+    position:relative;
 }
 
-i:hover {
-    transform:scale(1.5)
+.fa-heart:hover {
+    transform:scale(1.2);
+}
+
+.fa-heart path {
+    stroke: black;
+    stroke-width: 20px;
+}
+
+body {
+    background-color:darkslategray;
 }

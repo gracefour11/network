@@ -11,12 +11,19 @@ Following
 
     <!-- SHOW ALL POSTS BY CURRENT USER -->
     {% for post in all_posts %}
-    <div class="card">
+    <div class="card border-light mb-3" id="post-view">
         <div class="card-body">
-            <h4 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h4>
-            <p class="card-text" id="post_text_{{post.id}}"> {{ post.contents }}</p>
-            <p class="card-text ml-auto p-2">{{post.created_dt}}</p>
-            <!-- <p class="card-text"></p> -->
+            <h2 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h2>
+            <h3 class="card-text" id="post_body_{{post.id}}"> {{ post.contents }}</h3>
+            <h5 class="card-text" id="like_count_{{post.id}}"> Likes: {{ post.get_likes_count }}</h5>
+            <p class="card-text ml-auto p-2"><small>{{post.created_dt}}</small></p>
+            
+            {% if request.user in post.likes.all %}
+              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: grey; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+            {% else %}
+              <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: salmon; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+            {% endif %} 
+
         </div>
     </div>
     {% endfor %}
