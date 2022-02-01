@@ -1,25 +1,64 @@
 {% extends "network/layout.html" %}
+{% load static %}
+
 
 {% block title %}
-All Posts
+  {{ title }}
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid">
-    <h1>All Posts</h1>
+<div class="container-fluid" id="index-view">
+  {% if is_profile_page == "True" %}
+    {% include "network/profile.html" %}
+  {% else %}  
+    <h1>{{ title }}</h1>
+  {% endif %}
     <!-- CREATE POST -->
+  {% if remove_create_post == "False" %}
     {% include "network/createpost.html" %}
+  {% endif %}
+    
     <br>
     {% csrf_token %}
 
     <!-- SHOW ALL POSTS BY CURRENT USER -->
     {% for post in all_posts %}
-    <div class="card">
+    <div class="card border-light mb-3" id="post-view">
         <div class="card-body">
-            <h4 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h4>
-            <p class="card-text" id="post_text_{{post.id}}"> {{ post.contents }}</p>
-            <p class="card-text ml-auto p-2">{{post.created_dt}}</p>
-            <!-- <p class="card-text"></p> -->
+            <h2 class="card-title"><a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a></h2>
+            <h3 class="card-text" id="post_body_{{post.id}}"> {{ post.contents }}</h3>
+            <!-- <h5 class="card-text" id="like_count_{{post.id}}"> Likes: {{ post.get_likes_count }}</h5> -->
+            <p class="card-text ml-auto p-2"><small>{{post.created_dt}}</small></p>
+            
+            <div style="display: inline-flex">
+              {% if request.user in post.likes.all %}
+                <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: salmon; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+              {% else %}
+                <i id="like_btn_{{post.id}}" class="fa fa-heart fa-2x" style="color: white; " onclick="like_or_unlike(`{{post.id}}`)"></i>
+              {% endif %}
+              &nbsp;&nbsp;&nbsp;
+              <h5 id="like_count_{{post.id}}"> {{ post.get_likes_count }}</h5>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <!-- EDIT FUNCTION (if current user is post user) -->
+              {% ifequal request.user post.user %}
+              <button class="btn btn-outline-info" onclick='edit_post(`{{post.id}}`)'>Edit</button>
+              {% endifequal %}
+            </div> 
+
+            <!-- EDIT POST VIEW -->
+            <div id="edit_post_body_{{post.id}}" style="display:none">
+              <br>
+              <h5>Edit Post</h5>
+              <form id="edit_form_{{post.id}}">
+                <div class="form-group">
+                  <div class="input-group">
+                      <textarea class="form-control" rows="3" id="edit_text_{{post.id}}">{{post.contents}}</textarea>
+                  </div>
+              </div>
+              <button type="submit" class="btn btn-success">Save Changes</button>
+              </form>
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -44,6 +83,9 @@ All Posts
           <li class="page-item disabled"><span class="page-link">Next</span></li>
         {% endif %}
     </ul>
-
 </div>
+<script type ="text/javascript" src="{% static 'network/index.js' %}"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 {% endblock %}
+

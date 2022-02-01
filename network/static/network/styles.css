@@ -1,15 +1,30 @@
-#createpost-button{
-    background-color: teal;
-    color: white;
-    border:black;
-    position: relative;
-    /* float: left; */
-    margin-top: 10px;
-    margin-bottom: 20px;
-    margin-left: 0%;
-    /* border-bottom:1px solid black; */
+#index-view, #following-view, #profile-view, #login-view, #register-view {
+    color:whitesmoke;
+    padding:3rem;
+}
+.card {
+    background-color: white;
+    color: darkslategray;
 }
 
-#createpost-button h1{
-    font-size: 2rem;
+#createpost-form {
+    padding:2rem;
+}
+
+#post-view {
+    padding: 2rem;
+    position:relative;
+}
+
+.fa-heart:hover {
+    transform:scale(1.2);
+}
+
+.fa-heart path {
+    stroke: black;
+    stroke-width: 20px;
+}
+
+body {
+    background-color:darkslategray;
 }

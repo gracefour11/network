@@ -4,7 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
+from django.http.response import JsonResponse
+import json
 
 from .models import *
 from . import forms
@@ -12,12 +15,13 @@ from . import forms
 MAX_POSTS_PER_PAGE = 10
 
 def index(request):
-
-    all_posts = Post.objects.all().order_by('-created_dt')
-    page_obj = paginate(request, all_posts)
+    unpaginated_posts = Post.objects.all().order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
     return render(request, "network/index.html", {
         'form': forms.CreatePostForm(),
-        'all_posts': page_obj
+        'all_posts': all_posts,
+        "title": "All Posts",
+        'remove_create_post': "False"
     })
 
 def paginate(request, dataList):
@@ -103,6 +107,36 @@ def create_post(request):
             "form": form,
         })
 
+
+@csrf_exempt
+@login_required
+def edit_post(request, id):
+    if request.method == 'POST':
+        post = Post.objects.get(id=id)
+        data = json.loads(request.body)
+        if data.get("body") is not None:
+            post.contents = data["body"]
+        post.save()
+        return JsonResponse({"success": 'Post updated successfully.'}, status=204)
+    return JsonResponse({"error": "POST request required."}, status=400)
+            
+@csrf_exempt
+@login_required
+def like(request, id):
+    if request.method == 'POST':
+        post = Post.objects.get(id=id)
+        users_who_like_post = post.likes.all()
+        request_user = request.user
+        data = json.loads(request.body)
+        if data.get("like") == 'true':
+            post.likes.add(request_user)
+        else:
+            post.likes.remove(request_user)
+        post.save()
+        return JsonResponse({"likes": post.get_likes_count()})
+    return JsonResponse({"error": "POST request required."}, status=400)
+
+
 @login_required
 def profile(request, username):
     request_user = request.user
@@ -110,20 +144,26 @@ def profile(request, username):
     follow_list = request_user.follow_list.all()
     following_count = profile_user.get_following_count()
     follower_count = profile_user.get_follower_count()
-    all_posts = Post.objects.all().order_by('-created_dt')
-    page_obj = paginate(request, all_posts)
+    unpaginated_posts = Post.objects.filter(user=profile_user).order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
     is_following = False
     
     if profile_user in follow_list:
         is_following = True
+
+    remove_create_post = "True"
+    if request_user == profile_user:
+        remove_create_post = "False"
     
-    return render(request, "network/profile.html", {
+    return render(request, "network/index.html", {
         'profile_user': profile_user,
         'following_count': following_count,
         'follower_count': follower_count,
         'all_posts': all_posts,
-        'page_obj': page_obj,
-        'is_following': is_following
+        'is_following': is_following,
+        'is_profile_page': "True",
+        'title': profile_user.username,
+        'remove_create_post': remove_create_post
     })
 
 @login_required
@@ -145,3 +185,19 @@ def unfollow(request, id):
     return redirect(reverse('profile', kwargs={
         'username': target.username
     }))
+
+@login_required
+def following(request):
+    user = request.user
+    follow_list = user.follow_list.all()
+    unpaginated_posts = Post.objects.filter(user__in=follow_list).order_by('-created_dt')
+    all_posts = paginate(request, unpaginated_posts)
+
+    return render(request, "network/index.html", {
+        'all_posts': all_posts,
+        'title': "Following",
+        'remove_create_post': "True"
+    })
+
+
+

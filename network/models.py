@@ -16,7 +16,11 @@ class Post(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="userID")
     contents = models.CharField(max_length=280, default=None)
     created_dt = models.DateTimeField(default=datetime.datetime.now)
+    likes = models.ManyToManyField(User, related_name="likes", blank=True)
 
     def __str__ (self):
         return f"{self.id}: {self.contents} by {self.user_id} on {self.created_dt}"
+    
+    def get_likes_count(self):
+        return self.likes.count()
 
